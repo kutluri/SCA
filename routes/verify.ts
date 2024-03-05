@@ -157,6 +157,9 @@ exports.databaseRelatedChallenges = () => (req: Request, res: Response, next: Ne
   if (challengeUtils.notSolved(challenges.dlpPastebinDataLeakChallenge)) {
     dlpPastebinDataLeakChallenge()
   }
+  if (challengeUtils.notSolved(challenges.csafChallenge)) {
+    csafChallenge()
+  }
   next()
 }
 
@@ -171,7 +174,7 @@ function changeProductChallenge (osaft: Product) {
     }
     if (urlForProductTamperingChallenge) {
       if (!utils.contains(osaft.description, `${urlForProductTamperingChallenge}`)) {
-        if (utils.contains(osaft.description, `<a href="${config.get('challenges.overwriteUrlForProductTamperingChallenge')}" target="_blank">More...</a>`)) {
+        if (utils.contains(osaft.description, `<a href="${config.get<string>('challenges.overwriteUrlForProductTamperingChallenge')}" target="_blank">More...</a>`)) {
           challengeUtils.solve(challenges.changeProductChallenge)
         }
       }
@@ -376,6 +379,25 @@ function dlpPastebinDataLeakChallenge () {
   }).then(({ count }: { count: number }) => {
     if (count > 0) {
       challengeUtils.solve(challenges.dlpPastebinDataLeakChallenge)
+    }
+  }).catch(() => {
+    throw new Error('Unable to get data for known vulnerabilities. Please try again')
+  })
+}
+
+function csafChallenge () {
+  FeedbackModel.findAndCountAll({ where: { comment: { [Op.like]: '%' + config.get<string>('challenges.csafHashValue') + '%' } } }
+  ).then(({ count }: { count: number }) => {
+    if (count > 0) {
+      challengeUtils.solve(challenges.csafChallenge)
+    }
+  }).catch(() => {
+    throw new Error('Unable to get data for known vulnerabilities. Please try again')
+  })
+  ComplaintModel.findAndCountAll({ where: { message: { [Op.like]: '%' + config.get<string>('challenges.csafHashValue') + '%' } } }
+  ).then(({ count }: { count: number }) => {
+    if (count > 0) {
+      challengeUtils.solve(challenges.csafChallenge)
     }
   }).catch(() => {
     throw new Error('Unable to get data for known vulnerabilities. Please try again')

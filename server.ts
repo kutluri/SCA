@@ -37,6 +37,8 @@ import registerWebsocketEvents from './lib/startup/registerWebsocketEvents'
 import customizeApplication from './lib/startup/customizeApplication'
 import customizeEasterEgg from './lib/startup/customizeEasterEgg' // vuln-code-snippet hide-line
 
+import authenticatedUsers from './routes/authenticatedUsers'
+
 const startTime = Date.now()
 const finale = require('finale-rest')
 const express = require('express')
@@ -78,9 +80,9 @@ const restoreProgress = require('./routes/restoreProgress')
 const fileServer = require('./routes/fileServer')
 const quarantineServer = require('./routes/quarantineServer')
 const keyServer = require('./routes/keyServer')
+const wellKnownServer = require('./routes/wellKnownServer')
 const logFileServer = require('./routes/logfileServer')
 const metrics = require('./routes/metrics')
-const authenticatedUsers = require('./routes/authenticatedUsers')
 const currentUser = require('./routes/currentUser')
 const login = require('./routes/login')
 const changePassword = require('./routes/changePassword')
@@ -128,7 +130,7 @@ const locales = require('./data/static/locales.json')
 const i18n = require('i18n')
 const antiCheat = require('./lib/antiCheat')
 
-const appName = config.get('application.customMetricsPrefix')
+const appName = config.get<string>('application.customMetricsPrefix')
 const startupGauge = new Prometheus.Gauge({
   name: `${appName}_startup_duration_seconds`,
   help: `Duration ${appName} required to perform a certain task during startup`,
@@ -209,6 +211,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
     acknowledgements: config.get('application.securityTxt.acknowledgements'),
     'Preferred-Languages': [...new Set(locales.map((locale: { key: string }) => locale.key.substr(0, 2)))].join(', '),
     hiring: config.get('application.securityTxt.hiring'),
+    csaf: config.get<string>('server.baseUrl') + config.get<string>('application.securityTxt.csaf'),
     expires: securityTxtExpiration.toUTCString()
   }))
 
@@ -258,6 +261,9 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.use('/ftp', serveIndexMiddleware, serveIndex('ftp', { icons: true })) // vuln-code-snippet vuln-line directoryListingChallenge
   app.use('/ftp(?!/quarantine)/:file', fileServer()) // vuln-code-snippet vuln-line directoryListingChallenge
   app.use('/ftp/quarantine/:file', quarantineServer()) // vuln-code-snippet neutral-line directoryListingChallenge
+
+  app.use('/.well-known/csaf/:file', wellKnownServer())
+  app.use('/.well-known', serveIndexMiddleware, serveIndex('.well-known', { icons: true, view: 'details' }))
 
   /* /encryptionkeys directory browsing */
   app.use('/encryptionkeys', serveIndexMiddleware, serveIndex('encryptionkeys', { icons: true, view: 'details' }))
@@ -322,7 +328,7 @@ restoreOverwrittenFilesWithOriginals().then(() => {
   app.use('/rest/user/reset-password', new RateLimit({
     windowMs: 5 * 60 * 1000,
     max: 100,
-    keyGenerator ({ headers, ip }: { headers: any, ip: any }) { return headers['X-Forwarded-For'] || ip } // vuln-code-snippet vuln-line resetPasswordMortyChallenge
+    keyGenerator ({ headers, ip }: { headers: any, ip: any }) { return headers['X-Forwarded-For'] ?? ip } // vuln-code-snippet vuln-line resetPasswordMortyChallenge
   }))
   // vuln-code-snippet end resetPasswordMortyChallenge
 
