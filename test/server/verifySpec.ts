@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2014-2023 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2024 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
 import sinon = require('sinon')
 import config from 'config'
-import type { Product } from '../../data/types'
-const chai = require('chai')
-const sinonChai = require('sinon-chai')
+import type { Product as ProductConfig } from '../../lib/config.types'
+import chai = require('chai')
+import sinonChai = require('sinon-chai')
 const expect = chai.expect
 chai.use(sinonChai)
 const cache = require('../../data/datacache')
@@ -234,7 +234,7 @@ describe('verify', () => {
 
       it('is not solved when the link in the O-Saft product remained unchanged', () => {
         let urlForProductTamperingChallenge = null
-        for (const product of config.get<Product[]>('products')) {
+        for (const product of config.get<ProductConfig[]>('products')) {
           if (product.urlForProductTamperingChallenge !== undefined) {
             urlForProductTamperingChallenge = product.urlForProductTamperingChallenge
             break

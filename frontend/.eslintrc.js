@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2024 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
@@ -22,7 +22,6 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': 'off',
     '@typescript-eslint/no-extraneous-class': 'off',
     '@typescript-eslint/restrict-template-expressions': 'off',
-    '@typescript-eslint/restrict-plus-operands': 'off',
     '@typescript-eslint/prefer-nullish-coalescing': 'off'
   }
 }

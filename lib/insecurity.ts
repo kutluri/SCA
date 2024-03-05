@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2023 Bjoern Kimminich & the OWASP Juice Shop contributors.
+ * Copyright (c) 2014-2024 Bjoern Kimminich & the OWASP Juice Shop contributors.
  * SPDX-License-Identifier: MIT
  */
 
@@ -60,7 +60,7 @@ export const decode = (token: string) => { return jws.decode(token).payload }
 export const sanitizeHtml = (html: string) => sanitizeHtmlLib(html)
 export const sanitizeLegacy = (input = '') => input.replace(/<(?:\w+)\W+?[\w]/gi, '')
 export const sanitizeFilename = (filename: string) => sanitizeFilenameLib(filename)
-export const sanitizeSecure = (html: string): string | null => {
+export const sanitizeSecure = (html: string): string => {
   const sanitized = sanitizeHtml(html)
   if (sanitized === html) {
     return html
